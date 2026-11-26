@@ -104,6 +104,7 @@ p { color: var(--tinta-2); }
 .etiqueta-prioridade { background: var(--tinta); color: #fff; }
 .etiqueta-verde { background: var(--verde-claro); color: var(--verde); }
 
+[hidden] { display: none !important; }
 .cartao { background: var(--papel); border: 1px solid var(--linha); border-radius: var(--raio); padding: 26px; box-shadow: var(--sombra-1); }
 .cartao h3 { font-size: 1.25rem; }
 
@@ -251,8 +252,8 @@ font { background: none !important; box-shadow: none !important; }
 .duas-colunas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
 .agendamento { display: grid; grid-template-columns: 1.25fr .75fr; gap: 28px; align-items: start; }
-.agendamento form { display: grid; gap: 18px; }
-.horarios { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+.agendamento form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+.horarios { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; }
 .horarios button { min-height: 44px; border-radius: 10px; border: 1.5px solid var(--linha); background: var(--papel); font-weight: 700; font-variant-numeric: tabular-nums; transition: all .15s ease; }
 .horarios button:hover:not([disabled]) { border-color: var(--azul); color: var(--azul-escuro); }
 .horarios button[aria-pressed="true"] { background: var(--azul-botao); border-color: var(--azul-botao); color: #fff; }
@@ -269,6 +270,7 @@ font { background: none !important; box-shadow: none !important; }
 .meus-agendamentos li small { color: var(--tinta-3); }
 
 /* ---------- Notícias (carrossel) ---------- */
+.grade-noticias { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); align-items: start; }
 .carrossel { position: relative; overflow: hidden; border-radius: var(--raio-g); background: var(--papel); border: 1px solid var(--linha); box-shadow: var(--sombra-1); }
 .carrossel-trilho { display: flex; transition: transform .6s cubic-bezier(.25, .8, .25, 1); }
 .slide { flex: 0 0 100%; display: grid; grid-template-columns: 300px 1fr; min-height: 280px; }
@@ -288,7 +290,7 @@ font { background: none !important; box-shadow: none !important; }
 /* ---------- Avaliação ---------- */
 .avaliacao { display: grid; gap: 16px; }
 .estrelas { display: flex; gap: 6px; }
-.estrelas button { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; color: #c8cfe0; transition: transform .15s ease, color .15s ease; }
+.estrelas button { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; color: #bfd3ca; transition: transform .15s ease, color .15s ease; }
 .estrelas button .icone { width: 34px; height: 34px; }
 .estrelas button.acesa { color: var(--ambar); }
 .estrelas button.acesa .icone { fill: currentColor; }
@@ -380,7 +382,7 @@ kbd { display: inline-block; min-width: 1.7em; padding: 1px 6px; border-radius: 
 @keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
 
 /* ---------- Modo TV ---------- */
-.tv { min-height: 100vh; display: grid; grid-template-rows: auto 1fr auto; background: var(--degrade); color: #fff; }
+.tv { min-height: 100vh; display: grid; grid-template-rows: auto 1fr auto; grid-template-columns: minmax(0, 1fr); background: var(--degrade); color: #fff; }
 .tv-topo { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 22px 40px; }
 .tv-topo .marca { color: #fff; }
 .tv-topo .marca-nome small { color: rgba(255, 255, 255, .6); }
@@ -492,10 +494,11 @@ html.alto-contraste .aviso-acao { color: #ffe14d; text-decoration: underline; }
     .ferramentas .acessibilidade, .ferramentas .globo { display: none; }
 }
 @media (max-width: 900px) {
-    .hero .container, .agendamento, .painel, .tv-corpo { grid-template-columns: 1fr; }
-    .grade-3, .grade-4, .passos, .numeros { grid-template-columns: 1fr 1fr; }
-    .rodape-grade { grid-template-columns: 1fr 1fr; }
-    .slide { grid-template-columns: 1fr; }
+    .hero .container, .agendamento, .painel, .tv-corpo { grid-template-columns: minmax(0, 1fr); }
+    .grade-3, .grade-4, .passos, .numeros { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .rodape-grade { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .grade-noticias { grid-template-columns: minmax(0, 1fr); }
+    .slide { grid-template-columns: minmax(0, 1fr); }
     .slide-arte { min-height: 150px; }
     .slide-arte .icone { width: 64px; height: 64px; }
     .slide-texto { padding: 24px 24px 72px; }
@@ -505,14 +508,17 @@ html.alto-contraste .aviso-acao { color: #ffe14d; text-decoration: underline; }
 @media (max-width: 640px) {
     .container { width: min(var(--largura), 100% - 32px); }
     .secao { padding: 60px 0; }
-    .grade-2, .grade-3, .grade-4, .passos, .duas-colunas, .rodape-grade { grid-template-columns: 1fr; }
-    .numeros { grid-template-columns: 1fr 1fr; }
+    .grade-2, .grade-3, .grade-4, .passos, .duas-colunas, .rodape-grade { grid-template-columns: minmax(0, 1fr); }
+    .numeros { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
     .marca-nome small { display: none; }
     .hero { padding: 48px 0 100px; }
     .chamando { padding: 22px; }
-    .indicadores { grid-template-columns: 1fr 1fr; }
-    .janela-acoes { grid-template-columns: 1fr; }
+    .indicadores { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .janela-acoes { grid-template-columns: minmax(0, 1fr); }
     .aviso-demo { left: 12px; right: 12px; bottom: 12px; max-width: none; }
+    .numero strong { font-size: 2rem; }
+    .tv-topo { flex-wrap: wrap; }
+    .tv-relogio strong { font-size: 1.8rem; }
 }
 @media (hover: none) {
     .atalho:hover, .especialidade:hover { transform: none; }
