@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-titulo="nav.inicio">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Início · Hospital Santa Cecilia</title>
+    <meta name="description" content="Painel de atendimento do Hospital Santa Cecilia: retire sua senha, acompanhe a fila em tempo real e agende consultas.">
+    <meta name="author" content="Beatriz Oliveira">
+    <meta name="theme-color" content="#040445">
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./css/estilo.css?v=202611261312">
+    <script src="./js/textos.js?v=202611261312"></script>
+    <script src="./js/i18n.js?v=202611261312"></script>
+</head>
+<body>
+<div id="topo"></div>
+<script src="./js/layout.js?v=202611261312"></script>
+
+<main id="conteudo">
+    <!-- Abertura -->
+    <section class="hero">
+        <div class="container">
+            <div>
+                <span class="sobretitulo" data-i18n="hero.sobre"></span>
+                <h1 data-i18n-html="hero.titulo"></h1>
+                <p class="hero-texto" data-i18n="hero.texto"></p>
+                <div class="hero-acoes">
+                    <a class="botao botao-primario botao-grande" href="./fila.html"><span data-icone="ticket"></span><span data-i18n="hero.senha"></span></a>
+                    <a class="botao botao-vidro botao-grande" href="#agendar"><span data-icone="calendario"></span><span data-i18n="hero.agendar"></span></a>
+                </div>
+                <p class="relogio"><span data-icone="relogio"></span><span data-i18n="hero.agora"></span> <strong id="relogio"></strong></p>
+            </div>
+
+            <aside class="ao-vivo" aria-live="polite">
+                <div class="ao-vivo-topo">
+                    <strong style="color:#fff" data-i18n="vivo.titulo"></strong>
+                    <span class="ponto-vivo" data-i18n="vivo.ao"></span>
+                </div>
+                <div class="ao-vivo-senha" id="vivoSenha"></div>
+                <div class="ao-vivo-dados">
+                    <div><small data-i18n="vivo.nafila"></small><strong id="vivoFila">0</strong></div>
+                    <div><small data-i18n="vivo.espera"></small><strong><span id="vivoTempo">0</span> min</strong></div>
+                </div>
+                <a class="botao botao-claro botao-bloco" href="./fila.html"><span data-i18n="vivo.abrir"></span><span data-icone="seta"></span></a>
+            </aside>
+        </div>
+    </section>
+
+    <!-- Atalhos -->
+    <div class="container atalhos">
+        <div class="grade grade-3">
+            <a class="atalho" href="./fila.html"><span class="icone-redondo"><span data-icone="ticket"></span></span><div><strong data-i18n="atalho.fila"></strong><span data-i18n="atalho.fila.t"></span></div></a>
+            <a class="atalho" href="#agendar"><span class="icone-redondo"><span data-icone="calendario"></span></span><div><strong data-i18n="atalho.agendar"></strong><span data-i18n="atalho.agendar.t"></span></div></a>
+            <a class="atalho" href="./tv.html" target="_blank" rel="noopener"><span class="icone-redondo"><span data-icone="tv"></span></span><div><strong data-i18n="atalho.tv"></strong><span data-i18n="atalho.tv.t"></span></div></a>
+        </div>
+    </div>
+
+    <!-- Como funciona -->
+    <section class="secao">
+        <div class="container">
+            <div class="cabecalho-secao">
+                <span class="sobretitulo" data-i18n="como.sobre"></span>
+                <h2 data-i18n="como.titulo"></h2>
+            </div>
+            <div class="passos">
+                <div class="passo revelar"><span class="icone-redondo"><span data-icone="ticket"></span></span><h3 data-i18n="como.1"></h3><p data-i18n="como.1.t"></p></div>
+                <div class="passo revelar"><span class="icone-redondo"><span data-icone="megafone"></span></span><h3 data-i18n="como.2"></h3><p data-i18n="como.2.t"></p></div>
+                <div class="passo revelar"><span class="icone-redondo"><span data-icone="check"></span></span><h3 data-i18n="como.3"></h3><p data-i18n="como.3.t"></p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Agendamento -->
+    <section class="secao secao-papel" id="agendar">
+        <div class="container">
+            <div class="cabecalho-secao">
+                <span class="sobretitulo" data-i18n="ag.sobre"></span>
+                <h2 data-i18n="ag.titulo"></h2>
+                <p data-i18n="ag.texto"></p>
+            </div>
+            <div class="agendamento">
+                <form id="formAgendamento" class="cartao" novalidate>
+                    <div class="campo">
+                        <label for="especialidade" data-i18n="ag.especialidade"></label>
+                        <select id="especialidade" name="especialidade" required></select>
+                        <span class="erro" id="erro-especialidade"></span>
+                    </div>
+                    <div class="campo">
+                        <label for="data" data-i18n="ag.data"></label>
+                        <input id="data" name="data" type="date" required>
+                        <span class="erro" id="erro-data"></span>
+                    </div>
+                    <div class="campo">
+                        <span class="rotulo" id="rotuloHorario" data-i18n="ag.horario"></span>
+                        <div id="horarios" role="group" aria-labelledby="rotuloHorario"></div>
+                        <span class="erro" id="erro-horario"></span>
+                    </div>
+                    <div class="campo">
+                        <label for="nome" data-i18n="ag.nome"></label>
+                        <input id="nome" name="nome" type="text" autocomplete="name" required>
+                        <span class="erro" id="erro-nome"></span>
+                    </div>
+                    <div class="duas-colunas">
+                        <div class="campo">
+                            <label for="email" data-i18n="ag.email"></label>
+                            <input id="email" name="email" type="email" autocomplete="email" required data-i18n-ph="ag.ph.email">
+                            <span class="erro" id="erro-email"></span>
+                        </div>
+                        <div class="campo">
+                            <label for="telefone" data-i18n="ag.telefone"></label>
+                            <input id="telefone" name="telefone" type="tel" autocomplete="tel" inputmode="numeric" required data-i18n-ph="ag.ph.telefone">
+                            <span class="erro" id="erro-telefone"></span>
+                        </div>
+                    </div>
+                    <div class="campo">
+                        <label for="mensagem" data-i18n="ag.mensagem"></label>
+                        <textarea id="mensagem" name="mensagem" maxlength="500" required data-i18n-ph="ag.ph.mensagem"></textarea>
+                        <span class="ajuda"><span data-i18n="ag.mensagem.ajuda"></span><span id="contador">0/500</span></span>
+                        <span class="erro" id="erro-mensagem"></span>
+                    </div>
+                    <button type="submit" class="botao botao-primario botao-grande botao-bloco"><span data-icone="check"></span><span data-i18n="ag.enviar"></span></button>
+                    <p style="text-align:center;font-size:.9rem"><a href="./fila.html" data-i18n="ag.ou"></a></p>
+                </form>
+
+                <aside class="grade" style="gap:18px">
+                    <div class="confirmacao" id="confirmacao" hidden aria-live="polite"></div>
+                    <div class="cartao">
+                        <h3 style="margin-bottom:14px" data-i18n="ag.meus"></h3>
+                        <ul class="meus-agendamentos" id="meusAgendamentos"></ul>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>
+
+    <!-- Notícias e avaliação -->
+    <section class="secao">
+        <div class="container">
+            <div class="cabecalho-secao">
+                <span class="sobretitulo" data-i18n="not.sobre"></span>
+                <h2 data-i18n="not.titulo"></h2>
+            </div>
+            <div class="grade" style="grid-template-columns: 1.6fr 1fr; align-items: start" id="gradeNoticias">
+                <div class="carrossel" id="carrossel" aria-roledescription="carousel">
+                    <div class="carrossel-trilho" id="trilho"></div>
+                    <div class="carrossel-controles">
+                        <div class="pontos" id="pontos"></div>
+                        <div class="setas">
+                            <button type="button" id="anterior" data-i18n-aria="not.anterior"><span data-icone="anterior"></span></button>
+                            <button type="button" id="proxima" data-i18n-aria="not.proxima"><span data-icone="proxima"></span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cartao avaliacao" id="avaliacao">
+                    <span class="sobretitulo" data-i18n="av.sobre"></span>
+                    <h3 data-i18n="av.titulo"></h3>
+                    <div class="estrelas" id="estrelas" role="radiogroup" data-i18n-aria="av.titulo"></div>
+                    <p class="rotulo-nota" id="rotuloNota"></p>
+                    <div class="campo">
+                        <label for="comentario" data-i18n="av.comentario"></label>
+                        <textarea id="comentario" maxlength="300" style="min-height:80px"></textarea>
+                    </div>
+                    <button type="button" class="botao botao-primario" id="enviarAvaliacao" disabled data-i18n="av.enviar"></button>
+                    <p class="confirmacao" id="obrigado" hidden></p>
+                    <div class="media-avaliacoes" id="media"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div id="rodape"></div>
+<script src="./js/fila.js?v=202611261312"></script>
+<script src="./js/dados.js?v=202611261312"></script>
+<script src="./js/inicio.js?v=202611261312"></script>
+</body>
+</html>
