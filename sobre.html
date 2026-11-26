@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-titulo="nav.sobre">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre nós · Hospital Santa Cecilia</title>
+    <meta name="description" content="Conheça a história, a missão, a visão e os valores do Hospital Santa Cecilia.">
+    <meta name="author" content="Beatriz Oliveira">
+    <meta name="theme-color" content="#053d2e">
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./css/estilo.css?v=202611261540">
+    <script src="./js/textos.js?v=202611261540"></script>
+    <script src="./js/i18n.js?v=202611261540"></script>
+</head>
+<body>
+<div id="topo"></div>
+<script src="./js/layout.js?v=202611261540"></script>
+
+<main id="conteudo">
+    <header class="cabecalho-pagina">
+        <div class="container">
+            <span class="sobretitulo" data-i18n="sobre.sobre"></span>
+            <h1 style="margin-top:10px" data-i18n="sobre.titulo"></h1>
+        </div>
+    </header>
+
+    <section class="container" style="padding-bottom:64px">
+        <article class="cartao revelar" style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start;padding:32px">
+            <span class="icone-redondo"><span data-icone="historia"></span></span>
+            <div>
+                <h2 style="font-size:1.6rem;margin-bottom:10px" data-i18n="sobre.historia"></h2>
+                <p style="font-size:1.06rem" data-i18n="sobre.historia.t"></p>
+            </div>
+        </article>
+        <div class="grade grade-3" style="margin-top:22px">
+            <article class="cartao revelar"><span class="icone-redondo"><span data-icone="alvo"></span></span><h3 style="margin:14px 0 8px" data-i18n="sobre.missao"></h3><p data-i18n="sobre.missao.t"></p></article>
+            <article class="cartao revelar"><span class="icone-redondo"><span data-icone="olho"></span></span><h3 style="margin:14px 0 8px" data-i18n="sobre.visao"></h3><p data-i18n="sobre.visao.t"></p></article>
+            <article class="cartao revelar"><span class="icone-redondo"><span data-icone="diamante"></span></span><h3 style="margin:14px 0 12px" data-i18n="sobre.valores"></h3>
+                <ul class="valores"><li data-i18n="sobre.v1"></li><li data-i18n="sobre.v2"></li><li data-i18n="sobre.v3"></li><li data-i18n="sobre.v4"></li></ul></article>
+        </div>
+    </section>
+
+    <section class="secao secao-escura">
+        <div class="container numeros">
+            <div class="numero"><strong data-contar="1995">1995</strong><span data-i18n="sobre.n1"></span></div>
+            <div class="numero"><strong data-contar="10">10</strong><span data-i18n="sobre.n2"></span></div>
+            <div class="numero"><strong data-contar="3">3</strong><span data-i18n="sobre.n3"></span></div>
+            <div class="numero"><strong data-contar="24">24</strong><span data-i18n="sobre.n4"></span></div>
+        </div>
+    </section>
+
+    <section class="secao">
+        <div class="container">
+            <div class="cabecalho-secao"><h2 data-i18n="sobre.contato"></h2></div>
+            <div class="grade grade-3">
+                <div class="cartao" style="display:flex;gap:14px;align-items:center"><span class="icone-redondo"><span data-icone="telefone"></span></span><strong>(11) 98765-4321</strong></div>
+                <div class="cartao" style="display:flex;gap:14px;align-items:center"><span class="icone-redondo"><span data-icone="pino"></span></span><strong data-i18n="rod.endereco"></strong></div>
+                <div class="cartao" style="display:flex;gap:14px;align-items:center;overflow-wrap:anywhere"><span class="icone-redondo"><span data-icone="email"></span></span><strong>contato@hospitalsantacecilia.com.br</strong></div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div id="rodape"></div>
+<script>
+// Números contam de 0 até o valor quando aparecem na tela
+(function () {
+    const itens = document.querySelectorAll('[data-contar]');
+    const animar = (el) => {
+        const alvo = +el.dataset.contar;
+        const inicio = alvo > 1000 ? alvo - 30 : 0;
+        const t0 = performance.now();
+        const passo = (agora) => {
+            const p = Math.min(1, (agora - t0) / 1200);
+            el.textContent = Math.round(inicio + (alvo - inicio) * (1 - Math.pow(1 - p, 3)));
+            if (p < 1) requestAnimationFrame(passo);
+        };
+        requestAnimationFrame(passo);
+    };
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+    const obs = new IntersectionObserver((ent) => ent.forEach(e => { if (e.isIntersecting) { animar(e.target); obs.unobserve(e.target); } }), { threshold: .5 });
+    itens.forEach(el => obs.observe(el));
+})();
+</script>
+</body>
+</html>

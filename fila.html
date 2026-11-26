@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-titulo="nav.fila">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fila de atendimento · Hospital Santa Cecilia</title>
+    <meta name="description" content="Painel de fila de espera: retire sua senha, acompanhe a fila e veja quem está sendo chamado.">
+    <meta name="author" content="Beatriz Oliveira">
+    <meta name="theme-color" content="#053d2e">
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./css/estilo.css?v=202611261540">
+    <script src="./js/textos.js?v=202611261540"></script>
+    <script src="./js/i18n.js?v=202611261540"></script>
+</head>
+<body>
+<div id="topo"></div>
+<script src="./js/layout.js?v=202611261540"></script>
+
+<main id="conteudo">
+    <header class="cabecalho-pagina">
+        <div class="container linha-topo">
+            <div>
+                <h1 data-i18n="fila.titulo"></h1>
+                <p data-i18n="fila.texto"></p>
+            </div>
+            <a class="botao botao-contorno" href="./tv.html" target="_blank" rel="noopener" id="abrirTv"><span data-icone="tv"></span><span data-i18n="fila.tv"></span></a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="minha-senha-faixa" id="minhaSenha" hidden aria-live="polite">
+            <div>
+                <strong id="minhaSenhaTitulo"></strong>
+                <div id="minhaSenhaInfo"></div>
+            </div>
+            <div class="minha-senha-acoes">
+                <button type="button" class="botao botao-primario botao-pequeno" id="ativarNotificacoes" hidden><span data-icone="sino"></span><span data-i18n="fila.notif.ativar"></span></button>
+                <button type="button" class="botao botao-contorno botao-pequeno" id="esquecerSenha" data-i18n="fila.minha.esquecer"></button>
+            </div>
+        </div>
+
+        <div class="painel">
+            <div class="grade" style="gap:22px">
+                <!-- Chamando agora -->
+                <section class="chamando" id="chamando" aria-live="assertive">
+                    <div class="chamando-topo">
+                        <h2><span data-icone="megafone"></span><span data-i18n="fila.chamando"></span></h2>
+                        <span class="relogio" style="margin:0"><strong id="relogio"></strong></span>
+                    </div>
+                    <div id="chamandoConteudo"></div>
+                    <div class="controles-atendente">
+                        <button type="button" class="botao botao-claro" id="chamarProxima"><span data-icone="proxima"></span><span data-i18n="fila.chamar"></span></button>
+                        <button type="button" class="botao botao-vidro" id="repetirChamada"><span data-icone="repetir"></span><span data-i18n="fila.repetir"></span></button>
+                    </div>
+                    <div class="controles-atendente" style="margin-top:14px; align-items:center">
+                        <label class="interruptor"><input type="checkbox" id="autoAvancar"><span data-i18n="fila.auto"></span></label>
+                        <span class="contagem-auto" id="contagemAuto"></span>
+                        <label class="interruptor"><input type="checkbox" id="somAtivo"><span data-i18n="fila.som"></span></label>
+                    </div>
+                    <p class="dica-atalhos" data-i18n-html="fila.atalhos"></p>
+                </section>
+
+                <!-- Lista de espera -->
+                <section class="cartao">
+                    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px">
+                        <h2 style="font-size:1.35rem" data-i18n="fila.espera"></h2>
+                        <button type="button" class="botao botao-contorno botao-pequeno" id="reiniciarFila"><span data-icone="lixeira"></span><span data-i18n="fila.reiniciar"></span></button>
+                    </div>
+                    <ol class="lista-espera" id="listaEspera" aria-live="polite"></ol>
+                </section>
+            </div>
+
+            <div class="coluna-lateral">
+                <!-- Retirar senha -->
+                <section class="cartao retirar">
+                    <h2 style="font-size:1.35rem;display:flex;gap:10px;align-items:center"><span data-icone="ticket"></span><span data-i18n="fila.retirar"></span></h2>
+                    <p data-i18n="fila.retirar.texto"></p>
+                    <button type="button" class="botao botao-primario botao-grande" data-retirar="N"><span data-icone="pessoas"></span><span><span data-i18n="fila.btn.normal"></span><small data-i18n="fila.btn.normal.t"></small></span></button>
+                    <button type="button" class="botao botao-escuro botao-grande" data-retirar="P"><span data-icone="escudo"></span><span><span data-i18n="fila.btn.prior"></span><small data-i18n="fila.btn.prior.t"></small></span></button>
+                </section>
+
+                <!-- Indicadores -->
+                <section class="cartao">
+                    <div class="indicadores">
+                        <div class="indicador"><small data-i18n="fila.proxima"></small><strong id="proximaSenha">—</strong></div>
+                        <div class="indicador"><small data-i18n="fila.naespera"></small><strong id="totalEspera">0</strong></div>
+                        <div class="indicador destaque" style="grid-column:1/-1"><small data-i18n="fila.tempo"></small><strong id="tempoEstimado">0</strong> <span data-i18n="fila.min"></span></div>
+                    </div>
+                </section>
+
+                <!-- Histórico -->
+                <section class="cartao">
+                    <h2 style="font-size:1.2rem;margin-bottom:8px" data-i18n="fila.historico"></h2>
+                    <ul class="historico" id="historico"></ul>
+                </section>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Comprovante da senha -->
+<div class="janela" id="janelaSenha" role="dialog" aria-modal="true" aria-labelledby="compTitulo" hidden>
+    <div class="janela-caixa">
+        <button type="button" class="janela-fechar" data-fechar data-i18n-aria="comp.fechar"><span data-icone="fechar"></span></button>
+        <div class="comprovante" id="comprovante">
+            <span class="marca" id="compMarca"></span>
+            <h2 id="compTitulo" style="font-size:1.1rem;margin-top:8px" data-i18n="comp.titulo"></h2>
+            <div class="comprovante-numero"><strong id="compNumero"></strong></div>
+            <dl>
+                <div><dt data-i18n="comp.tipo"></dt><dd id="compTipo"></dd></div>
+                <div><dt data-i18n="comp.posicao"></dt><dd id="compPosicao"></dd></div>
+                <div><dt data-i18n="comp.tempo"></dt><dd id="compTempo"></dd></div>
+                <div><dt data-i18n="comp.previsto"></dt><dd id="compPrevisto"></dd></div>
+                <div><dt data-i18n="comp.hora"></dt><dd id="compHora"></dd></div>
+            </dl>
+            <p style="margin-top:8px" data-i18n="comp.guarde"></p>
+            <p style="font-weight:700;color:var(--azul-escuro)" data-i18n="comp.acompanhar"></p>
+        </div>
+        <div class="janela-acoes">
+            <button type="button" class="botao botao-contorno" id="imprimirSenha"><span data-icone="impressora"></span><span data-i18n="comp.imprimir"></span></button>
+            <button type="button" class="botao botao-primario" data-fechar data-i18n="comp.fechar"></button>
+        </div>
+    </div>
+</div>
+
+<div id="rodape"></div>
+<script src="./js/fila.js?v=202611261540"></script>
+<script src="./js/painel.js?v=202611261540"></script>
+</body>
+</html>

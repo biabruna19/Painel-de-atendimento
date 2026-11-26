@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-titulo="nav.especialidades">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Especialidades · Hospital Santa Cecilia</title>
+    <meta name="description" content="Especialidades do Hospital Santa Cecilia: encontre e agende sua consulta.">
+    <meta name="author" content="Beatriz Oliveira">
+    <meta name="theme-color" content="#053d2e">
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./css/estilo.css?v=202611261540">
+    <script src="./js/textos.js?v=202611261540"></script>
+    <script src="./js/i18n.js?v=202611261540"></script>
+</head>
+<body>
+<div id="topo"></div>
+<script src="./js/layout.js?v=202611261540"></script>
+
+<main id="conteudo">
+    <header class="cabecalho-pagina">
+        <div class="container">
+            <span class="sobretitulo" data-i18n="esp.sobre"></span>
+            <h1 style="margin-top:10px" data-i18n="esp.titulo"></h1>
+            <p data-i18n="esp.texto"></p>
+        </div>
+    </header>
+    <section class="container" style="padding-bottom:80px">
+        <div class="busca-especialidade">
+            <span data-icone="busca"></span>
+            <label class="visualmente-oculto" for="buscaEsp" data-i18n="esp.buscar"></label>
+            <input id="buscaEsp" type="search" autocomplete="off" data-i18n-ph="esp.buscar">
+        </div>
+        <div class="grade grade-3" id="listaEsp" aria-live="polite"></div>
+    </section>
+</main>
+
+<div id="rodape"></div>
+<script src="./js/dados.js?v=202611261540"></script>
+<script>
+(function () {
+    const lista = document.getElementById('listaEsp');
+    const busca = document.getElementById('buscaEsp');
+    const semAcento = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    function desenhar() {
+        const idioma = I18N.idioma();
+        const termo = semAcento(busca.value.trim());
+        const itens = ESPECIALIDADES
+            .filter(e => !termo || semAcento(e.nome[idioma] + ' ' + e.desc[idioma]).includes(termo))
+            .sort((a, b) => a.nome[idioma].localeCompare(b.nome[idioma]));
+        lista.innerHTML = itens.length ? itens.map(e => `
+            <article class="cartao especialidade">
+                <span class="icone-redondo">${icone(e.icone)}</span>
+                <h2 style="font-size:1.3rem">${e.nome[idioma]}</h2>
+                <p>${e.desc[idioma]}</p>
+                <a class="botao botao-primario" href="./index.html?especialidade=${e.id}#agendar">${icone('calendario')}<span>${I18N.t('esp.agendar')}</span></a>
+            </article>`).join('')
+            : `<p class="vazio" style="grid-column:1/-1">${I18N.t('esp.nenhuma')}</p>`;
+    }
+    busca.addEventListener('input', desenhar);
+    I18N.aoTrocar(desenhar);
+    desenhar();
+})();
+</script>
+</body>
+</html>
