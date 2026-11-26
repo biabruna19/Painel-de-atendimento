@@ -171,10 +171,10 @@
 
     // ---------- Notícias ----------
     const NOTICIAS = [
-        { n: 1, icone: 'seringa', cor: 'linear-gradient(135deg,#253d7e,#4c82ff)' },
-        { n: 2, icone: 'sol', cor: 'linear-gradient(135deg,#2274a3,#4bbefc)' },
-        { n: 3, icone: 'pulmao', cor: 'linear-gradient(135deg,#040445,#2274a3)' },
-        { n: 4, icone: 'ticket', cor: 'linear-gradient(135deg,#2f5fd8,#4bbefc)' },
+        { n: 1, icone: 'seringa', cor: 'linear-gradient(135deg,#0b5c8f,#0ea5e9)' },
+        { n: 2, icone: 'sol', cor: 'linear-gradient(135deg,#0e7490,#38bdf8)' },
+        { n: 3, icone: 'pulmao', cor: 'linear-gradient(135deg,#062b4a,#0e7490)' },
+        { n: 4, icone: 'ticket', cor: 'linear-gradient(135deg,#0284c7,#38bdf8)' },
     ];
     let slide = 0;
     let timer = null;
