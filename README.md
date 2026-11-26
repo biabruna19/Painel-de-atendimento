@@ -15,10 +15,11 @@ Um painel de atendimento para um hospital fictício. A ideia é diminuir a fila 
 ## O que dá para fazer
 
 - **Retirar senha** normal ou prioritária e receber um comprovante, que também pode ser impresso.
-- **Acompanhar a fila**: posição, tempo estimado e aviso quando a sua senha é chamada. Os prioritários são atendidos primeiro e, dentro de cada tipo, vale a ordem de chegada.
-- **Chamar a próxima senha** como atendente, repetir a chamada ou deixar o painel chamar sozinho a cada 30 segundos. Cada chamada toca um sinal e é anunciada em voz alta.
+- **Acompanhar a fila**: posição, horário previsto e aviso quando a sua senha é chamada. Se você estiver em outra aba, o site manda uma notificação, faz o celular vibrar e o título da aba fica piscando. Os prioritários são atendidos primeiro e, dentro de cada tipo, vale a ordem de chegada.
+- **Chamar a próxima senha** como atendente, repetir a chamada ou deixar o painel chamar sozinho a cada 30 segundos. Cada chamada toca um sinal e é anunciada em voz alta. Quem atende também pode usar o teclado: <kbd>Espaço</kbd> chama a próxima, <kbd>R</kbd> repete e <kbd>N</kbd> ou <kbd>P</kbd> retiram uma senha.
 - **Modo TV**: uma tela para a sala de espera que mostra a senha chamada, as últimas chamadas e dicas de saúde. Aberta em outra aba ou em outro monitor, ela se atualiza sozinha junto com o painel.
-- **Agendar consulta**: escolher a especialidade, o dia e um horário livre, e receber um número de protocolo. Os agendamentos ficam listados e podem ser cancelados.
+- **Agendar consulta**: escolher a especialidade, o dia e um horário livre, e receber um número de protocolo. Dá para adicionar a consulta à agenda do celular ou copiar o protocolo. Se a página for fechada no meio, o que já foi preenchido continua lá quando você volta.
+- **Desfazer**: cancelou um agendamento ou reiniciou a fila sem querer? Aparece um aviso com o botão Desfazer, no lugar daquelas janelas de confirmação do navegador.
 - **Especialidades** com busca, já levando para o agendamento preenchido.
 - **Avaliar o atendimento** com estrelas e um comentário.
 - **Acessibilidade**: alto contraste, quatro tamanhos de fonte e navegação pelo teclado.

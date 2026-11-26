@@ -128,12 +128,24 @@
                 <button type="button" class="botao botao-contorno botao-pequeno" data-cancelar="${a.protocolo}">${t('ag.cancelar')}</button></li>`).join('')
             : `<li style="background:none;padding:0;color:var(--tinta-3)">${t('ag.meus.vazio')}</li>`;
     }
+    // Cancelar sem janela de confirmação: some na hora e dá para desfazer
     $('meusAgendamentos').addEventListener('click', (e) => {
         const b = e.target.closest('[data-cancelar]');
-        if (!b || !confirm(t('ag.cancelar.confirma'))) return;
+        if (!b) return;
+        const removido = agendamentos().find(a => a.protocolo === b.dataset.cancelar);
         localStorage.setItem(CHAVE_AG, JSON.stringify(agendamentos().filter(a => a.protocolo !== b.dataset.cancelar)));
+        if (ultimoConfirmado && ultimoConfirmado.protocolo === b.dataset.cancelar) { ultimoConfirmado = null; desenharConfirmacao(); }
         desenharMeus();
         desenharHorarios();
+        avisoRapido(t('ag.cancelado'), {
+            acao: t('aviso.desfazer'),
+            aoAcionar: () => {
+                localStorage.setItem(CHAVE_AG, JSON.stringify([...agendamentos(), removido]));
+                desenharMeus();
+                desenharHorarios();
+                avisoRapido(t('ag.restaurado'));
+            },
+        });
     });
 
     let ultimoConfirmado = null;
@@ -144,8 +156,99 @@
         caixa.hidden = false;
         caixa.innerHTML = `<h3>${icone('check')}${t('ag.ok.titulo')}</h3>
             <p>${t('ag.ok.texto', { esp: nomeEsp(a.especialidade), data: dataBonita(a.data), hora: a.hora })}</p>
-            <p>${t('ag.ok.protocolo')}: <code>${a.protocolo}</code></p>`;
+            <p>${t('ag.ok.protocolo')}: <code>${a.protocolo}</code></p>
+            <div class="confirmacao-acoes">
+                <button type="button" class="botao botao-primario botao-pequeno" data-agenda>${icone('calendario')}${t('ag.agenda')}</button>
+                <button type="button" class="botao botao-contorno botao-pequeno" data-copiar>${icone('copiar')}${t('ag.copiar')}</button>
+            </div>`;
     }
+
+    // Arquivo .ics: abre no Google Agenda, no calendário do celular ou no Outlook
+    function baixarAgenda(a) {
+        const [ano, mes, dia] = a.data.split('-');
+        const [h, m] = a.hora.split(':').map(Number);
+        const fim = h * 60 + m + 30;
+        const hora = (min) => `${String(Math.floor(min / 60)).padStart(2, '0')}${String(min % 60).padStart(2, '0')}00`;
+        const escapar = (txt) => txt.replace(/[\\,;]/g, (c) => '\\' + c);
+        const agora = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+        const ics = [
+            'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Hospital Santa Cecilia//Painel de atendimento//PT', 'CALSCALE:GREGORIAN',
+            'BEGIN:VEVENT',
+            `UID:${a.protocolo}@hospital-santa-cecilia`,
+            `DTSTAMP:${agora}`,
+            `DTSTART:${ano}${mes}${dia}T${hora(h * 60 + m)}`,
+            `DTEND:${ano}${mes}${dia}T${hora(fim)}`,
+            `SUMMARY:${escapar(t('ag.evento', { esp: nomeEsp(a.especialidade) }))}`,
+            `DESCRIPTION:${escapar(t('ag.evento.texto', { p: a.protocolo }))}`,
+            'LOCATION:Hospital Santa Cecilia',
+            'BEGIN:VALARM', 'TRIGGER:-PT1H', 'ACTION:DISPLAY', `DESCRIPTION:${escapar(t('ag.evento', { esp: nomeEsp(a.especialidade) }))}`, 'END:VALARM',
+            'END:VEVENT', 'END:VCALENDAR',
+        ].join('\r\n');
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
+        link.download = `consulta-${a.protocolo}.ics`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    }
+
+    async function copiar(texto) {
+        try { await navigator.clipboard.writeText(texto); }
+        catch (e) {
+            // navegadores antigos ou página aberta sem https
+            const campo = document.createElement('textarea');
+            campo.value = texto;
+            campo.style.position = 'fixed'; campo.style.opacity = '0';
+            document.body.appendChild(campo);
+            campo.select();
+            document.execCommand('copy');
+            campo.remove();
+        }
+        avisoRapido(t('ag.copiado'));
+    }
+
+    $('confirmacao').addEventListener('click', (e) => {
+        if (!ultimoConfirmado) return;
+        if (e.target.closest('[data-agenda]')) baixarAgenda(ultimoConfirmado);
+        if (e.target.closest('[data-copiar]')) copiar(ultimoConfirmado.protocolo);
+    });
+
+    // ---------- Rascunho: o que foi digitado não se perde se a página for fechada ----------
+    const CHAVE_RASCUNHO = 'hsc_rascunho';
+    let fecharAvisoRascunho = null;
+    const CAMPOS = ['especialidade', 'data', 'nome', 'email', 'telefone', 'mensagem'];
+    function salvarRascunho() {
+        const r = { hora: horarioEscolhido };
+        CAMPOS.forEach(c => { r[c] = $(c).value; });
+        if (CAMPOS.some(c => r[c].trim())) localStorage.setItem(CHAVE_RASCUNHO, JSON.stringify(r));
+        else localStorage.removeItem(CHAVE_RASCUNHO);
+    }
+    function limparFormulario() {
+        form.reset();
+        $('contador').textContent = '0/500';
+        horarioEscolhido = null;
+        form.querySelectorAll('[aria-invalid]').forEach(el => el.removeAttribute('aria-invalid'));
+        form.querySelectorAll('.erro').forEach(el => { el.textContent = ''; });
+        localStorage.removeItem(CHAVE_RASCUNHO);
+        if (fecharAvisoRascunho) { fecharAvisoRascunho(); fecharAvisoRascunho = null; }
+        desenharHorarios();
+    }
+    function restaurarRascunho() {
+        let r;
+        try { r = JSON.parse(localStorage.getItem(CHAVE_RASCUNHO)); } catch (e) { r = null; }
+        if (!r) return false;
+        CAMPOS.forEach(c => { if (r[c]) $(c).value = r[c]; });
+        if (campoData.value && campoData.value < campoData.min) campoData.value = '';
+        horarioEscolhido = r.hora || null;
+        $('contador').textContent = `${$('mensagem').value.length}/500`;
+        desenharHorarios();
+        fecharAvisoRascunho = avisoRapido(t('ag.rascunho'), { acao: t('ag.limpar'), aoAcionar: limparFormulario, duracao: 9000 });
+        return true;
+    }
+    form.addEventListener('input', salvarRascunho);
+    form.addEventListener('change', salvarRascunho);
+    $('horarios').addEventListener('click', salvarRascunho);
 
     form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -157,10 +260,7 @@
         };
         localStorage.setItem(CHAVE_AG, JSON.stringify([...agendamentos(), novo]));
         ultimoConfirmado = novo;
-        form.reset();
-        $('contador').textContent = '0/500';
-        horarioEscolhido = null;
-        desenharHorarios();
+        limparFormulario();
         desenharMeus();
         desenharConfirmacao();
         $('confirmacao').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -171,10 +271,10 @@
 
     // ---------- Notícias ----------
     const NOTICIAS = [
-        { n: 1, icone: 'seringa', cor: 'linear-gradient(135deg,#0b5c8f,#0ea5e9)' },
-        { n: 2, icone: 'sol', cor: 'linear-gradient(135deg,#0e7490,#38bdf8)' },
-        { n: 3, icone: 'pulmao', cor: 'linear-gradient(135deg,#062b4a,#0e7490)' },
-        { n: 4, icone: 'ticket', cor: 'linear-gradient(135deg,#0284c7,#38bdf8)' },
+        { n: 1, icone: 'seringa', cor: 'linear-gradient(135deg,#0b6b4f,#10b981)' },
+        { n: 2, icone: 'sol', cor: 'linear-gradient(135deg,#0f766e,#34d399)' },
+        { n: 3, icone: 'pulmao', cor: 'linear-gradient(135deg,#053d2e,#0f766e)' },
+        { n: 4, icone: 'ticket', cor: 'linear-gradient(135deg,#059669,#34d399)' },
     ];
     let slide = 0;
     let timer = null;
@@ -274,6 +374,7 @@
     }
     I18N.aoTrocar(desenharIdioma);
     desenharIdioma();
+    restaurarRascunho();
     if (pedida && ESPECIALIDADES.some(e => e.id === pedida)) { selEsp.value = pedida; desenharHorarios(); }
     iniciar();
     setInterval(relogio, 1000 * 15);

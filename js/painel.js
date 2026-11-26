@@ -1,6 +1,8 @@
 /*
  * Página da fila (fila.html): chamada atual, controles do atendente,
  * lista de espera, retirada de senha com comprovante e "acompanhar minha senha".
+ * Quando a senha da pessoa é chamada, ela é avisada mesmo em outra aba
+ * (notificação, vibração no celular e o título da aba piscando).
  */
 (function () {
     const $ = (id) => document.getElementById(id);
@@ -18,6 +20,52 @@
     som.addEventListener('change', () => localStorage.setItem('hsc_som', som.checked ? '1' : '0'));
 
     const nomeTipo = (s) => (s.tipo === 'P' ? t('fila.prioritario') : t('fila.normal'));
+    const previsao = (minutos) => formatarHora(Date.now() + minutos * 60000);
+
+    // ---------- Aviso de "é a sua vez" ----------
+    const CHAVE_AVISADA = 'hsc_avisada';
+    const tituloOriginal = () => document.title.replace(/^● .*? · /, '');
+    let piscar = null;
+    function pararPiscar() {
+        if (!piscar) return;
+        clearInterval(piscar.timer);
+        document.title = piscar.titulo;
+        piscar = null;
+    }
+    function piscarTitulo(texto) {
+        pararPiscar();
+        const titulo = tituloOriginal();
+        let ligado = false;
+        piscar = { titulo, timer: setInterval(() => { ligado = !ligado; document.title = ligado ? `${texto} · ${titulo}` : titulo; }, 1000) };
+    }
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') pararPiscar(); });
+    window.addEventListener('focus', pararPiscar);
+
+    function avisarMinhaVez(senha) {
+        if (sessionStorage.getItem(CHAVE_AVISADA) === String(senha.id)) return;
+        sessionStorage.setItem(CHAVE_AVISADA, senha.id);
+        if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
+        if (document.visibilityState === 'visible') return;
+        piscarTitulo(t('fila.aba', { s: senha.numero }));
+        if ('Notification' in window && Notification.permission === 'granted') {
+            try {
+                const n = new Notification(t('fila.notif.titulo', { s: senha.numero }), {
+                    body: t('fila.minha.vez', { g: senha.guiche }), icon: './favicon.svg', tag: 'hsc-senha', requireInteraction: true,
+                });
+                n.onclick = () => { window.focus(); n.close(); };
+            } catch (e) { /* alguns celulares só permitem notificação por service worker */ }
+        }
+    }
+
+    const botaoNotif = $('ativarNotificacoes');
+    function desenharBotaoNotif() {
+        botaoNotif.hidden = !('Notification' in window) || Notification.permission !== 'default';
+    }
+    botaoNotif.addEventListener('click', async () => {
+        const resposta = await Notification.requestPermission();
+        desenharBotaoNotif();
+        avisoRapido(t(resposta === 'granted' ? 'fila.notif.ok' : 'fila.notif.negada'));
+    });
 
     // ---------- Desenho ----------
     function desenharChamando(animar) {
@@ -75,10 +123,13 @@
         if (senha.status === 'chamando') {
             faixa.classList.add('chamada');
             $('minhaSenhaInfo').textContent = t('fila.minha.vez', { g: senha.guiche });
+            botaoNotif.hidden = true;
+            avisarMinhaVez(senha);
         } else {
             faixa.classList.remove('chamada');
             const pos = FILA.posicao(id);
-            $('minhaSenhaInfo').textContent = pos === 0 ? t('fila.minha.proximo') : t('fila.minha.pos', { n: pos, m: FILA.minutosAte(pos) });
+            $('minhaSenhaInfo').textContent = pos === 0 ? t('fila.minha.proximo') : t('fila.minha.prev', { n: pos, h: previsao(FILA.minutosAte(pos)) });
+            desenharBotaoNotif();
         }
     }
 
@@ -101,7 +152,22 @@
 
     $('chamarProxima').addEventListener('click', () => { FILA.chamarProxima(); restante = INTERVALO; });
     $('repetirChamada').addEventListener('click', () => FILA.repetirChamada());
-    $('reiniciarFila').addEventListener('click', () => { if (confirm(t('fila.reiniciar.confirma'))) { sessionStorage.removeItem(CHAVE_MINHA); FILA.reiniciar(); } });
+    // Reiniciar sem janela de confirmação: a fila some na hora e dá para desfazer
+    $('reiniciarFila').addEventListener('click', () => {
+        const copia = FILA.copia();
+        const minha = sessionStorage.getItem(CHAVE_MINHA);
+        if (!copia.senhas.length) return;
+        sessionStorage.removeItem(CHAVE_MINHA);
+        FILA.reiniciar();
+        avisoRapido(t('fila.reiniciada'), {
+            acao: t('aviso.desfazer'),
+            aoAcionar: () => {
+                if (minha) sessionStorage.setItem(CHAVE_MINHA, minha);
+                FILA.restaurar(copia);
+                avisoRapido(t('fila.restaurada'));
+            },
+        });
+    });
 
     FILA.aoMudar((estado, evento) => {
         desenharTudo(evento && evento.tipo === 'chamada');
@@ -119,6 +185,7 @@
         $('compTipo').textContent = nomeTipo(senha);
         $('compPosicao').textContent = t('fila.posicao', { n: pos + 1 });
         $('compTempo').textContent = `~${FILA.minutosAte(pos)} ${t('fila.min')}`;
+        $('compPrevisto').textContent = previsao(FILA.minutosAte(pos));
         $('compHora').textContent = formatarHora(senha.criada);
         focoAnterior = document.activeElement;
         janela.hidden = false;
@@ -134,6 +201,22 @@
     janela.querySelectorAll('[data-fechar]').forEach(b => b.addEventListener('click', fecharComprovante));
     janela.addEventListener('click', (e) => { if (e.target === janela) fecharComprovante(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !janela.hidden) fecharComprovante(); });
+    // ---------- Atalhos de teclado para quem atende ----------
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey || e.metaKey || e.altKey || e.repeat || !janela.hidden) return;
+        const alvo = e.target;
+        if (alvo.closest && alvo.closest('input, textarea, select, button, a, [contenteditable="true"]')) {
+            // Espaço/Enter em um botão ou link continuam fazendo o normal
+            if (e.key === ' ' || e.key === 'Enter' || alvo.matches('input, textarea, select, [contenteditable="true"]')) return;
+        }
+        const tecla = e.key.toLowerCase();
+        const clicar = (el) => { if (el && !el.disabled) { e.preventDefault(); el.click(); } };
+        if (e.key === ' ' || e.key === 'ArrowRight') clicar($('chamarProxima'));
+        else if (tecla === 'r') clicar($('repetirChamada'));
+        else if (tecla === 'n') clicar(document.querySelector('[data-retirar="N"]'));
+        else if (tecla === 'p') clicar(document.querySelector('[data-retirar="P"]'));
+    });
+
     $('imprimirSenha').addEventListener('click', () => window.print());
     $('esquecerSenha').addEventListener('click', () => { sessionStorage.removeItem(CHAVE_MINHA); desenharTudo(false); });
 

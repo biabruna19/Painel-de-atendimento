@@ -6,15 +6,15 @@
     <title>Fila de atendimento · Hospital Santa Cecilia</title>
     <meta name="description" content="Painel de fila de espera: retire sua senha, acompanhe a fila e veja quem está sendo chamado.">
     <meta name="author" content="Beatriz Oliveira">
-    <meta name="theme-color" content="#062b4a">
+    <meta name="theme-color" content="#053d2e">
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="./css/estilo.css?v=202611261322">
-    <script src="./js/textos.js?v=202611261322"></script>
-    <script src="./js/i18n.js?v=202611261322"></script>
+    <link rel="stylesheet" href="./css/estilo.css?v=202611261540">
+    <script src="./js/textos.js?v=202611261540"></script>
+    <script src="./js/i18n.js?v=202611261540"></script>
 </head>
 <body>
 <div id="topo"></div>
-<script src="./js/layout.js?v=202611261322"></script>
+<script src="./js/layout.js?v=202611261540"></script>
 
 <main id="conteudo">
     <header class="cabecalho-pagina">
@@ -33,7 +33,10 @@
                 <strong id="minhaSenhaTitulo"></strong>
                 <div id="minhaSenhaInfo"></div>
             </div>
-            <button type="button" class="botao botao-contorno botao-pequeno" id="esquecerSenha" data-i18n="fila.minha.esquecer"></button>
+            <div class="minha-senha-acoes">
+                <button type="button" class="botao botao-primario botao-pequeno" id="ativarNotificacoes" hidden><span data-icone="sino"></span><span data-i18n="fila.notif.ativar"></span></button>
+                <button type="button" class="botao botao-contorno botao-pequeno" id="esquecerSenha" data-i18n="fila.minha.esquecer"></button>
+            </div>
         </div>
 
         <div class="painel">
@@ -54,6 +57,7 @@
                         <span class="contagem-auto" id="contagemAuto"></span>
                         <label class="interruptor"><input type="checkbox" id="somAtivo"><span data-i18n="fila.som"></span></label>
                     </div>
+                    <p class="dica-atalhos" data-i18n-html="fila.atalhos"></p>
                 </section>
 
                 <!-- Lista de espera -->
@@ -106,6 +110,7 @@
                 <div><dt data-i18n="comp.tipo"></dt><dd id="compTipo"></dd></div>
                 <div><dt data-i18n="comp.posicao"></dt><dd id="compPosicao"></dd></div>
                 <div><dt data-i18n="comp.tempo"></dt><dd id="compTempo"></dd></div>
+                <div><dt data-i18n="comp.previsto"></dt><dd id="compPrevisto"></dd></div>
                 <div><dt data-i18n="comp.hora"></dt><dd id="compHora"></dd></div>
             </dl>
             <p style="margin-top:8px" data-i18n="comp.guarde"></p>
@@ -119,7 +124,7 @@
 </div>
 
 <div id="rodape"></div>
-<script src="./js/fila.js?v=202611261322"></script>
-<script src="./js/painel.js?v=202611261322"></script>
+<script src="./js/fila.js?v=202611261540"></script>
+<script src="./js/painel.js?v=202611261540"></script>
 </body>
 </html>

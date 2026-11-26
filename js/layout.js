@@ -10,6 +10,8 @@
         cruz: '<path d="M12 5v14M5 12h14"/>',
         ticket: '<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2M13 17v2M13 11v2"/>',
         calendario: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+        copiar: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+        sino: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
         relogio: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
         pessoas: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
         megafone: '<path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
@@ -193,6 +195,42 @@
         if (sessionStorage.getItem('hsc_aviso')) aviso.remove();
         else aviso.querySelector('button').addEventListener('click', () => { sessionStorage.setItem('hsc_aviso', '1'); aviso.remove(); });
     }
+
+    // ---------- Avisos rápidos (no lugar das janelas confirm do navegador) ----------
+    // avisoRapido('Fila reiniciada', { acao: 'Desfazer', aoAcionar: () => ... })
+    window.avisoRapido = function (texto, opcoes = {}) {
+        let pilha = document.getElementById('avisos');
+        if (!pilha) {
+            pilha = document.createElement('div');
+            pilha.id = 'avisos';
+            pilha.className = 'avisos';
+            pilha.setAttribute('role', 'status');
+            pilha.setAttribute('aria-live', 'polite');
+            document.body.appendChild(pilha);
+        }
+        const aviso = document.createElement('div');
+        aviso.className = 'aviso-rapido';
+        aviso.innerHTML = `<span></span>${opcoes.acao ? '<button type="button" class="aviso-acao"></button>' : ''}
+            <button type="button" class="aviso-x" aria-label="${I18N.t('aviso.fechar')}">${icone('fechar')}</button>`;
+        aviso.querySelector('span').textContent = texto;
+        let tempo;
+        const fechar = () => { clearTimeout(tempo); aviso.classList.add('saindo'); setTimeout(() => aviso.remove(), 250); };
+        if (opcoes.acao) {
+            const b = aviso.querySelector('.aviso-acao');
+            b.textContent = opcoes.acao;
+            b.addEventListener('click', () => { fechar(); opcoes.aoAcionar && opcoes.aoAcionar(); });
+        }
+        aviso.querySelector('.aviso-x').addEventListener('click', fechar);
+        // passar o mouse ou focar segura o aviso na tela
+        const contar = () => { clearTimeout(tempo); tempo = setTimeout(fechar, opcoes.duracao || (opcoes.acao ? 7000 : 4000)); };
+        aviso.addEventListener('mouseenter', () => clearTimeout(tempo));
+        aviso.addEventListener('mouseleave', contar);
+        aviso.addEventListener('focusin', () => clearTimeout(tempo));
+        aviso.addEventListener('focusout', contar);
+        pilha.appendChild(aviso);
+        contar();
+        return fechar;
+    };
 
     // ---------- Aparecer ao rolar ----------
     function iniciarRevelar() {

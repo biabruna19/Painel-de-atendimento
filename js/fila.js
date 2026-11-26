@@ -120,6 +120,15 @@
             salvar({ tipo: 'reiniciada' });
         },
 
+        // usado pelo "Desfazer" depois de reiniciar a fila
+        copia: () => JSON.parse(JSON.stringify(estado)),
+        restaurar(copia) {
+            const versao = estado.versao;
+            estado = JSON.parse(JSON.stringify(copia));
+            estado.versao = versao;
+            salvar({ tipo: 'restaurada' });
+        },
+
         aoMudar: (fn) => ouvintes.push(fn),
     };
 
